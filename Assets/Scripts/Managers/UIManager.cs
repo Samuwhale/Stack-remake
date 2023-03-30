@@ -13,6 +13,8 @@ public class UIManager : MonoBehaviour
     public PauseScreenUI PauseScreenUI {get; private set;}
 
     public GameOverUI GameOverUI {get; private set;}
+    
+    public StartGameUI StartGameUI {get; private set;}
 
     // Has to be serialized because there is also an instance on the game over screen.
     [SerializeField] private ScoreUI _scoreUI;
@@ -34,6 +36,7 @@ public class UIManager : MonoBehaviour
         
         
         GameOverUI = GetComponentInChildren<GameOverUI>();
-        
+
+        StartGameUI = GetComponentInChildren<StartGameUI>();
     }
 }

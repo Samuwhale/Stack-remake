@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.UI;
 
-public class PauseScreenUI : MonoBehaviour
+public class PauseScreenUI : MonoBehaviour, IHasSettings
 {
     [SerializeField] private GameObject _visibilityObject;
     [SerializeField] private Button _resumeGameButton;
@@ -41,6 +41,7 @@ public class PauseScreenUI : MonoBehaviour
     private void ToSettingsPressed()
     {
         MS.Main.UIManager.SettingsUI.Show();
+        MS.Main.UIManager.SettingsUI.SetPreviousObject(this);
         Hide();
     }
 

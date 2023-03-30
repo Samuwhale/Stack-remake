@@ -174,7 +174,7 @@ namespace Sambono
             if (context.phase == InputActionPhase.Performed)
             {
                 PauseEvent?.Invoke();
-                SwitchToUI();
+                // SwitchToUI();
             }
         }
 
@@ -183,7 +183,7 @@ namespace Sambono
             if (context.phase == InputActionPhase.Performed)
             {
                 UnpauseEvent?.Invoke();
-                SwitchToGameplay();
+                // SwitchToGameplay();
             }
         }
 

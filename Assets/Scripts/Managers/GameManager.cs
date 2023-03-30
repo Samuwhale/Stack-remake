@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
     
     
     public enum States {
+        StartMenu,
         Playing,
         Menu,
         GameOver,
@@ -44,6 +45,7 @@ public class GameManager : MonoBehaviour
     {
         _inputReader.PauseEvent += InputReader_OnPauseEvent;
         _inputReader.UnpauseEvent += InputReader_OnUnpauseEvent;
+        SwitchState(States.StartMenu);
     }
     
 
@@ -57,6 +59,13 @@ public class GameManager : MonoBehaviour
         TryResume();
     }
 
+    public void TryStart()
+    {
+        if (_currentState == States.StartMenu)
+        {
+            ResetGame();
+        }
+    }
 
     public void ResetGame()
     {
@@ -75,6 +84,7 @@ public class GameManager : MonoBehaviour
     public void TryPause()
     {
         if (IsPaused) return;
+        if (_currentState == States.StartMenu) return;
         IsPaused = true;
         _inputReader.SwitchToUI(); 
         OnGamePaused?.Invoke();
@@ -82,6 +92,8 @@ public class GameManager : MonoBehaviour
 
     private void UpdateFromState(States state) {
         switch (state) {
+            case States.StartMenu:
+                break;
             case States.Playing:
                 
                 break;
@@ -103,6 +115,9 @@ public class GameManager : MonoBehaviour
     
     private void EnterState(States state) {
         switch (state) {
+            case States.StartMenu:
+                _inputReader.SwitchToUI();
+                break;
             case States.Playing:
                 _inputReader.SwitchToGameplay(); 
                 break;
@@ -126,6 +141,8 @@ public class GameManager : MonoBehaviour
     
     private void ExitState(States state) {
         switch (state) {
+            case States.StartMenu:
+                break;
             case States.Playing:
                 break;
             case States.Menu:

@@ -9,7 +9,7 @@ using UnityEngine.UI;
 
     public class SettingsUI : MonoBehaviour
     {
-
+        private IHasSettings _previousObject;
         [SerializeField] private GameObject _visibilityObject;
 
         [SerializeField] private GameObject _rebindOverlayUI;
@@ -114,7 +114,7 @@ using UnityEngine.UI;
         }
 
         private void OnCloseButtonPressed() {
-            MS.Main.UIManager.PauseScreenUI.Show();
+            _previousObject.Show();
             Hide();
         }
 
@@ -175,11 +175,14 @@ using UnityEngine.UI;
             _sfxButton.Select();
         }
 
+        public void SetPreviousObject(IHasSettings previousObject)
+        {
+            _previousObject = previousObject;
+        }
         public void Show() {
             _visibilityObject.SetActive(true);
             UpdateVisuals();
             _sfxButton.Select();
-        
         }
 
         public void Hide() {
