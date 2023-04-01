@@ -67,10 +67,16 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void TriggerGameOver()
+    {
+        SwitchState(States.GameOver);
+    }
+    
     public void ResetGame()
     {
-        SwitchState(States.Playing);
         OnGameReset?.Invoke();
+        TryResume();
+        SwitchState(States.Playing);
     }
     
     public void TryResume()
