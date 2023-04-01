@@ -48,7 +48,7 @@ public class CubeManager : MonoBehaviour
             _currentCube = null;
             Destroy(cubeToDestroy);
         }
-        
+
         if (_previousCube != null)
         {
             var cubeToDestroy = _currentCube.gameObject;
@@ -66,12 +66,27 @@ public class CubeManager : MonoBehaviour
             _previousCube = _currentCube;
             _previousCubes.Add(_previousCube);
         }
+
         var newCubeTrans = Instantiate(_cubePrefab, transform);
-        newCubeTrans.localPosition = Vector3.up * _previousCubes.Count * _cubeHeight;
-        if (_previousCube != null) newCubeTrans.localScale = _previousCube.transform.localScale;
-         _cinemachineTarget.position = newCubeTrans.position;
+
+
+        if (_previousCube != null)
+        {
+            newCubeTrans.localScale = _previousCube.transform.localScale;
+            newCubeTrans.localPosition = _previousCube.transform.localPosition + Vector3.up * _cubeHeight;
+        }
+        
+        _cinemachineTarget.position = new Vector3(_cinemachineTarget.position.x, newCubeTrans.position.y, _cinemachineTarget.position.z);
         Cube newCube = newCubeTrans.GetComponent<Cube>();
-        newCube.SetHeadings();
+        if (_previousCubes.Count % 2 == 0)
+        {
+            newCube.SetHeadings(Direction.Forward);
+        }
+        else
+        {
+            newCube.SetHeadings(Direction.Horizontal);
+        }
+
         newCube.StartMoving();
         _currentCube = newCube;
     }

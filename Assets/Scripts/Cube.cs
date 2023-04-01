@@ -6,6 +6,12 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
+public enum Direction
+{
+    Horizontal,
+    Forward,
+}
+
 public class Cube : MonoBehaviour
 {
     [SerializeField] private float _moveCompletionTime;
@@ -17,6 +23,9 @@ public class Cube : MonoBehaviour
     private float _lerpProgress;
     private Material _material;
     private bool _shouldMove;
+    private Direction movementDirection;
+
+    [SerializeField] private GameObject _fallCubePrefab;
 
     private void Awake()
     {
@@ -69,10 +78,24 @@ public class Cube : MonoBehaviour
     }
 
 
-    public void SetHeadings()
+    public void SetHeadings(Direction direction)
     {
-        _fromLocation = transform.position + transform.right * (_moveDistance / 2);
-        _toLocation = transform.position + -transform.right * (_moveDistance / 2);
+        Vector3 directionVector;
+        switch (direction)
+        {
+            case Direction.Horizontal:
+                directionVector = transform.right;
+                break;
+            case Direction.Forward:
+                directionVector = transform.forward;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
+        }
+
+        _fromLocation = transform.position + directionVector * (_moveDistance / 2);
+        _toLocation = transform.position + -directionVector * (_moveDistance / 2);
+        movementDirection = direction;
     }
 
     void SwitchHeading()
@@ -91,46 +114,116 @@ public class Cube : MonoBehaviour
         _shouldMove = true;
     }
 
+    float CalculateOverhang(Vector3 previousCubeLocalPos)
+    {
+        switch (movementDirection)
+        {
+            case Direction.Horizontal:
+                return transform.localPosition.x - previousCubeLocalPos.x;
+
+            case Direction.Forward:
+                return transform.localPosition.z - previousCubeLocalPos.z;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    Vector3 CalculateNewScale(float overhang)
+    {
+        switch (movementDirection)
+        {
+            case Direction.Horizontal:
+                return new Vector3(transform.localScale.x - Mathf.Abs(overhang), transform.localScale.y, transform.localScale.z);
+            case Direction.Forward:
+                return new Vector3(transform.localScale.x, transform.localScale.y, transform.localScale.z - Mathf.Abs(overhang));
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    Vector3 CalculateNewPosition(float overhang)
+    {
+        switch (movementDirection)
+        {
+            case Direction.Horizontal:
+                return new Vector3(transform.localPosition.x - overhang / 2f, transform.localPosition.y, transform.localPosition.z);
+            case Direction.Forward:
+                return new Vector3(transform.localPosition.x, transform.localPosition.y, transform.localPosition.z - overhang / 2f);
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    void CreateFallCube(float overhang)
+    {
+        var fallCubeGameObject = Instantiate(_fallCubePrefab, transform.parent);
+        FallCube fallCube = fallCubeGameObject.GetComponent<FallCube>();
+        fallCube.SetColor(_material.color);
+        
+        switch (movementDirection)
+        {
+            
+            case Direction.Horizontal:
+                float fallCubeScaleX = Mathf.Abs(overhang);
+                float fallCubePosX = overhang > 0
+                    ? transform.localPosition.x + transform.localScale.x / 2 + fallCubeScaleX / 2
+                    : transform.localPosition.x - transform.localScale.x / 2 - fallCubeScaleX / 2;
+                
+                
+                fallCube.SetLocalScaleAndPosition(new Vector3(fallCubeScaleX, transform.localScale.y, transform.localScale.z),
+                    new Vector3(fallCubePosX, transform.localPosition.y, transform.localPosition.z));
+                
+                break;
+            case Direction.Forward:
+                float fallCubeScaleZ = Mathf.Abs(overhang);
+                float fallCubePosZ = overhang > 0
+                    ? transform.localPosition.x + transform.localScale.x / 2 + fallCubeScaleZ / 2
+                    : transform.localPosition.x - transform.localScale.x / 2 - fallCubeScaleZ / 2;
+
+                fallCube.SetLocalScaleAndPosition(new Vector3(transform.localScale.x, transform.localScale.y,fallCubeScaleZ),
+                    new Vector3(transform.localPosition.x, transform.localPosition.y,fallCubePosZ));
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+
+    }
+    
     public bool TryPlace(Cube previousCube)
     {
         StopMoving();
         Vector3 previousCubeLocalPos;
-        Vector3 previousCubeLocalScale;
 
         if (previousCube != null)
         {
             previousCubeLocalPos = previousCube.transform.localPosition;
-            previousCubeLocalScale = previousCube.transform.localScale;
         }
         else
         {
             previousCubeLocalPos = Vector3.zero - Vector3.up * transform.localScale.y;
-            previousCubeLocalScale = new Vector3(1, 0.1f, 1);
         }
 
-        
-        float overhangX = transform.localPosition.x - previousCubeLocalPos.x;
 
+        // float overhangX = transform.localPosition.x - previousCubeLocalPos.x;
+        //float newScaleX = transform.localScale.x - Mathf.Abs(overhangX);
+        float overhang = CalculateOverhang(previousCubeLocalPos);
 
-        float newScaleX = transform.localScale.x - Mathf.Abs(overhangX);
-        if (newScaleX <= 0)
+        Vector3 newScale = CalculateNewScale(overhang);
+
+        if (newScale.x <= 0 || newScale.z <= 0)
         {
             gameObject.AddComponent<Rigidbody>();
             return false;
         }
 
-        float newPosX = transform.localPosition.x - overhangX / 2;
+        Vector3 newPosition = CalculateNewPosition(overhang);
 
-        Vector3 newPosition = new Vector3(newPosX, transform.localPosition.y,
-            transform.localPosition.z);
-        Vector3 newScale = new Vector3(newScaleX, transform.localScale.y,
-            transform.localScale.z);
-
+        // float newPosX = transform.localPosition.x - overhangX / 2;
         transform.localPosition = newPosition;
         transform.localScale = newScale;
 
-        // GameObject fallCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-
+        CreateFallCube(overhang);
+        
         return true;
     }
 }
