@@ -1,10 +1,12 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
+using Vector3 = UnityEngine.Vector3;
 
 public enum Direction
 {
@@ -16,6 +18,7 @@ public class Cube : MonoBehaviour
 {
     [SerializeField] private float _moveCompletionTime;
     [SerializeField] private float _moveDistance;
+    [SerializeField] private ColorPaletteSO _palette;
     private int _currentDirection = 1;
     private Vector3 _fromLocation;
     private Vector3 _toLocation;
@@ -26,6 +29,8 @@ public class Cube : MonoBehaviour
     private Direction movementDirection;
 
     [SerializeField] private GameObject _fallCubePrefab;
+
+    public event Action OnPlaced;
 
     private void Awake()
     {
@@ -59,8 +64,10 @@ public class Cube : MonoBehaviour
 
     public void SetRandomColor()
     {
-        SetColor(Random.ColorHSV(0, 1f, 0.95f, 1f, 0.95f, 1f));
+        SetColor(_palette.Colors[Random.Range(0,_palette.Colors.Length)]);
     }
+    
+    
 
     void Move()
     {
@@ -69,7 +76,7 @@ public class Cube : MonoBehaviour
         _moveTimer += Time.deltaTime;
         _lerpProgress = _moveTimer / _moveCompletionTime;
 
-        transform.position = Vector3.Lerp(_fromLocation, _toLocation, Mathf.SmoothStep(0, 1, _lerpProgress));
+        transform.position = Vector3.Lerp(_fromLocation, _toLocation, Mathf.SmoothStep(0, 1, _lerpProgress)); 
 
         if (_moveTimer > _moveCompletionTime)
         {
@@ -81,13 +88,16 @@ public class Cube : MonoBehaviour
     public void SetHeadings(Direction direction)
     {
         Vector3 directionVector;
+        
         switch (direction)
         {
             case Direction.Horizontal:
                 directionVector = transform.right;
+                
                 break;
             case Direction.Forward:
                 directionVector = transform.forward;
+                
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(direction), direction, null);
@@ -133,9 +143,11 @@ public class Cube : MonoBehaviour
         switch (movementDirection)
         {
             case Direction.Horizontal:
-                return new Vector3(transform.localScale.x - Mathf.Abs(overhang), transform.localScale.y, transform.localScale.z);
+                return new Vector3(transform.localScale.x - Mathf.Abs(overhang), transform.localScale.y,
+                    transform.localScale.z);
             case Direction.Forward:
-                return new Vector3(transform.localScale.x, transform.localScale.y, transform.localScale.z - Mathf.Abs(overhang));
+                return new Vector3(transform.localScale.x, transform.localScale.y,
+                    transform.localScale.z - Mathf.Abs(overhang));
             default:
                 throw new ArgumentOutOfRangeException();
         }
@@ -146,9 +158,11 @@ public class Cube : MonoBehaviour
         switch (movementDirection)
         {
             case Direction.Horizontal:
-                return new Vector3(transform.localPosition.x - overhang / 2f, transform.localPosition.y, transform.localPosition.z);
+                return new Vector3(transform.localPosition.x - overhang / 2f, transform.localPosition.y,
+                    transform.localPosition.z);
             case Direction.Forward:
-                return new Vector3(transform.localPosition.x, transform.localPosition.y, transform.localPosition.z - overhang / 2f);
+                return new Vector3(transform.localPosition.x, transform.localPosition.y,
+                    transform.localPosition.z - overhang / 2f);
             default:
                 throw new ArgumentOutOfRangeException();
         }
@@ -159,20 +173,20 @@ public class Cube : MonoBehaviour
         var fallCubeGameObject = Instantiate(_fallCubePrefab, transform.parent);
         FallCube fallCube = fallCubeGameObject.GetComponent<FallCube>();
         fallCube.SetColor(_material.color);
-        
+
         switch (movementDirection)
         {
-            
             case Direction.Horizontal:
                 float fallCubeScaleX = Mathf.Abs(overhang);
                 float fallCubePosX = overhang > 0
                     ? transform.localPosition.x + transform.localScale.x / 2 + fallCubeScaleX / 2
                     : transform.localPosition.x - transform.localScale.x / 2 - fallCubeScaleX / 2;
-                
-                
-                fallCube.SetLocalScaleAndPosition(new Vector3(fallCubeScaleX, transform.localScale.y, transform.localScale.z),
+
+
+                fallCube.SetLocalScaleAndPosition(
+                    new Vector3(fallCubeScaleX, transform.localScale.y, transform.localScale.z),
                     new Vector3(fallCubePosX, transform.localPosition.y, transform.localPosition.z));
-                
+
                 break;
             case Direction.Forward:
                 float fallCubeScaleZ = Mathf.Abs(overhang);
@@ -180,15 +194,15 @@ public class Cube : MonoBehaviour
                     ? transform.localPosition.x + transform.localScale.x / 2 + fallCubeScaleZ / 2
                     : transform.localPosition.x - transform.localScale.x / 2 - fallCubeScaleZ / 2;
 
-                fallCube.SetLocalScaleAndPosition(new Vector3(transform.localScale.x, transform.localScale.y,fallCubeScaleZ),
-                    new Vector3(transform.localPosition.x, transform.localPosition.y,fallCubePosZ));
+                fallCube.SetLocalScaleAndPosition(
+                    new Vector3(transform.localScale.x, transform.localScale.y, fallCubeScaleZ),
+                    new Vector3(transform.localPosition.x, transform.localPosition.y, fallCubePosZ));
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
-
     }
-    
+
     public bool TryPlace(Cube previousCube)
     {
         StopMoving();
@@ -223,7 +237,7 @@ public class Cube : MonoBehaviour
         transform.localScale = newScale;
 
         CreateFallCube(overhang);
-        
+        OnPlaced?.Invoke();
         return true;
     }
 }

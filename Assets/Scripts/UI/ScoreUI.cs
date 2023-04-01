@@ -15,10 +15,28 @@ public class ScoreUI : MonoBehaviour
 
     void Start()
     {
-        // update these based on proper values
-        UpdateScoreText(0.ToString());
-        UpdateHighScoreText(0.ToString());
+        MS.Main.ScoreManager.OnScoreChanged += UpdateScore;
+        MS.Main.ScoreManager.OnHighScoreChanged += UpdateHighScore;
     }
+
+    private void OnEnable()
+    {
+        UpdateScore();
+        UpdateHighScore();
+    }
+
+    private void UpdateScore()
+    {
+        UpdateScoreText(MS.Main.ScoreManager.GetScoreAsString());
+        // ChangeScoreColors();
+    }
+    
+    private void UpdateHighScore()
+    {
+        // ChangeHighScoreColors();
+        UpdateHighScoreText(MS.Main.ScoreManager.GetHighScoreAsString());
+    }
+
 
     void ChangeScoreColors()
     {
@@ -61,7 +79,6 @@ public class ScoreUI : MonoBehaviour
     
     public void Show()
     {
-        
         _visibilityObject.SetActive(true);
     }
     

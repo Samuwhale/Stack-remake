@@ -14,6 +14,7 @@ public class CubeManager : MonoBehaviour
     private List<Cube> _previousCubes = new List<Cube>();
     private bool _shouldSpawn;
     [SerializeField] private float _cubeHeight;
+    
 
     private void Start()
     {
@@ -24,7 +25,11 @@ public class CubeManager : MonoBehaviour
 
     private void InputReader_OnInteract()
     {
-        if (_currentCube.TryPlace(_previousCube)) SpawnCube();
+        if (_currentCube.TryPlace(_previousCube))
+        {
+            SpawnCube();
+            MS.Main.ScoreManager.AddScore(1);
+        }
         else MS.Main.GameManager.TriggerGameOver();
     }
 
@@ -51,7 +56,7 @@ public class CubeManager : MonoBehaviour
 
         if (_previousCube != null)
         {
-            var cubeToDestroy = _currentCube.gameObject;
+            var cubeToDestroy = _previousCube.gameObject;
             _previousCube = null;
             Destroy(cubeToDestroy);
         }
@@ -78,7 +83,7 @@ public class CubeManager : MonoBehaviour
         
         _cinemachineTarget.position = new Vector3(_cinemachineTarget.position.x, newCubeTrans.position.y, _cinemachineTarget.position.z);
         Cube newCube = newCubeTrans.GetComponent<Cube>();
-        if (_previousCubes.Count % 2 == 0)
+        if (_previousCubes.Count % 2 != 0)
         {
             newCube.SetHeadings(Direction.Forward);
         }

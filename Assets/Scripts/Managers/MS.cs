@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.SocialPlatforms.Impl;
 
 public class MS : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class MS : MonoBehaviour
     
     [SerializeField]  EventManager _eventManager;
     [SerializeField]  AudioManager _audioManager;
+    [SerializeField]  ScoreManager _scoreManager;
     
 
     public GameManager GameManager => _gameManager;
@@ -22,6 +24,7 @@ public class MS : MonoBehaviour
     public EventManager EventManager => _eventManager;
 
     public AudioManager AudioManager => _audioManager;
+    public ScoreManager ScoreManager => _scoreManager;
 
 
     private void Awake()
