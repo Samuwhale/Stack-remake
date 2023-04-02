@@ -16,6 +16,11 @@ public class MS : MonoBehaviour
     [SerializeField]  AudioManager _audioManager;
     [SerializeField]  ScoreManager _scoreManager;
     
+    
+    // Input SHOULD be accessed through the scriptable object 'InputReader', but for quick and dirty testing an
+    // instance of it can be accessed through the InputManager (which basically just exposes an InputReader).
+    
+    [SerializeField] InputManager _inputManager;
 
     public GameManager GameManager => _gameManager;
 
@@ -25,6 +30,8 @@ public class MS : MonoBehaviour
 
     public AudioManager AudioManager => _audioManager;
     public ScoreManager ScoreManager => _scoreManager;
+
+    public InputManager InputManager => _inputManager;
 
 
     private void Awake()

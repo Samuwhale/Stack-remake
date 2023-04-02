@@ -144,7 +144,8 @@ using UnityEngine.UI;
 
         private void UpdateVisuals() {
             _masterButtonText.SetText($"Master: {AudioManager.ConvertDbToPercentage(MS.Main.AudioManager.MasterVolume):F1}%");
-            _musicButtonText.SetText($"Music: {AudioManager.ConvertDbToPercentage(MS.Main.AudioManager.MusicVolume):F1}%");
+            // renamed to ambience, normally music
+            _musicButtonText.SetText($"Ambience: {AudioManager.ConvertDbToPercentage(MS.Main.AudioManager.MusicVolume):F1}%");
             _sfxButtonText.SetText($"Sfx: {AudioManager.ConvertDbToPercentage(MS.Main.AudioManager.SfxVolume):F1}%");
         
             _moveUpButtonText.SetText(_inputReader.GetBindingKeyString(InputReader.Binding.MoveUp));
@@ -172,7 +173,7 @@ using UnityEngine.UI;
         void OnRebindComplete() {
             UpdateVisuals();
             _rebindOverlayUI.SetActive(false);
-            _sfxButton.Select();
+            if (MS.Main.InputManager.IsUsingGamepad()) _masterButton.Select();
         }
 
         public void SetPreviousObject(IHasSettings previousObject)
@@ -182,7 +183,7 @@ using UnityEngine.UI;
         public void Show() {
             _visibilityObject.SetActive(true);
             UpdateVisuals();
-            _sfxButton.Select();
+            if (MS.Main.InputManager.IsUsingGamepad()) _masterButton.Select();
         }
 
         public void Hide() {

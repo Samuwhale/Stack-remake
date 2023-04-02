@@ -61,7 +61,7 @@ public class PauseScreenUI : MonoBehaviour, IHasSettings
     public void Show()
     {
         _visibilityObject.SetActive(true);
-        _resumeGameButton.Select();
+        if (MS.Main.InputManager.IsUsingGamepad()) _resumeGameButton.Select();
     }
 
     public void Hide()

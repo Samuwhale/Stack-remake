@@ -12,7 +12,9 @@ public class AudioManager : MonoBehaviour {
     [SerializeField] private AudioSource _sfxSource;
     [SerializeField] private AudioMixer _masterMixer;
 
+    [SerializeField] private SoundsSO _sounds;
 
+    public SoundsSO Sounds => _sounds;
 
 
     public float MusicVolume { get; private set; }
@@ -28,15 +30,7 @@ public class AudioManager : MonoBehaviour {
 
     private void Awake()
     {
-     
-        MusicVolume = PlayerPrefs.GetFloat(PLAYERPREFS_MUSICVOLUME, -8);
-        _masterMixer.SetFloat("MusicVolume", MusicVolume);
-        
-        MasterVolume = PlayerPrefs.GetFloat(PLAYERPREFS_MASTERVOLUME, -8);
-        _masterMixer.SetFloat("MasterVolume", MasterVolume);
-        
-        SfxVolume = PlayerPrefs.GetFloat(PLAYERPREFS_SFXVOLUME, -8);
-        _masterMixer.SetFloat("SfxVolume", SfxVolume);
+
     }
 
     public static float ConvertDbToPercentage(float db)
@@ -45,8 +39,42 @@ public class AudioManager : MonoBehaviour {
     }
     private void Start()
     {
+        MusicVolume = PlayerPrefs.GetFloat(PLAYERPREFS_MUSICVOLUME, -16f);
+        _masterMixer.SetFloat("MusicVolume", MusicVolume);
+        
+        MasterVolume = PlayerPrefs.GetFloat(PLAYERPREFS_MASTERVOLUME, -8f);
+        _masterMixer.SetFloat("MasterVolume", MasterVolume);
+        
+        SfxVolume = PlayerPrefs.GetFloat(PLAYERPREFS_SFXVOLUME, -8f);
+        _masterMixer.SetFloat("SfxVolume", SfxVolume);
+        
+        // normally you'd want to trigger this manually
+        PlayBgm(Sounds.Ambience);
+        
+        MS.Main.GameManager.OnGameStateChanged += GameManager_OnGameStateChanged;
+        Cube.OnAnyBlockPlaced += Cube_OnAnyBlockPlaced;
+        PlaySoundOnButtonClick.OnAnyButtonClicked += PlaySoundOnButtonClick_OnAnyButtonClicked;
+        
     }
-    
+
+    private void PlaySoundOnButtonClick_OnAnyButtonClicked()
+    {
+        PlaySfx(Sounds.UISelect);
+        Debug.Log("Buttonclick");
+    }
+
+    private void Cube_OnAnyBlockPlaced()
+    {
+        PlaySfxFromArray(Sounds.PlaceBlock);
+    }
+
+    private void GameManager_OnGameStateChanged(GameManager.States state)
+    {
+        if (state == GameManager.States.GameOver)
+        {
+            PlaySfx(Sounds.GameOver);
+        }
+    }
 
 
     public void PlayBgm(AudioClip clip) {
@@ -62,15 +90,16 @@ public class AudioManager : MonoBehaviour {
         _bgmSource.Stop();
     }
     
-    public void PlaySfx(AudioClip clip) {
-        _sfxSource.pitch = Random.Range(0.5f, 0.55f);
+    public void PlaySfx(AudioClip clip, bool variatePitch = true) {
+
+        _sfxSource.pitch = variatePitch ? Random.Range(0.45f, 0.55f) : 0.5f;
         _sfxSource.PlayOneShot(clip);
     }
     
-    public void PlaySfxFromArray(AudioClip[] clips)
+    public void PlaySfxFromArray(AudioClip[] clips, bool variatePitch = true)
     {
         var clip = clips[Random.Range(0, clips.Length)];
-        _sfxSource.pitch = Random.Range(0.5f, 0.55f);
+        _sfxSource.pitch = variatePitch ? Random.Range(0.45f, 0.55f) : 0.5f;
         _sfxSource.PlayOneShot(clip);
     }
     
@@ -93,6 +122,30 @@ public class AudioManager : MonoBehaviour {
     public void ChangeSfxVolume() {
         SfxVolume += 4f;
         SfxVolume = SfxVolume > 0 ? -80 : SfxVolume;
+        _masterMixer.SetFloat("SfxVolume", SfxVolume);
+        PlayerPrefs.SetFloat(PLAYERPREFS_SFXVOLUME, SfxVolume);
+        PlayerPrefs.Save();
+    }
+    
+    public void ChangeMasterVolume(float db) {
+        
+        MasterVolume = Mathf.Clamp(db, -80, 0);
+        _masterMixer.SetFloat("MasterVolume", MasterVolume);
+        PlayerPrefs.SetFloat(PLAYERPREFS_MASTERVOLUME, MasterVolume);
+        PlayerPrefs.Save();
+    }
+    
+    public void ChangeMusicVolume(float db) {
+        
+        MusicVolume = Mathf.Clamp(db, -80, 0);
+        _masterMixer.SetFloat("MusicVolume", MusicVolume);
+        PlayerPrefs.SetFloat(PLAYERPREFS_MUSICVOLUME, MusicVolume);
+        PlayerPrefs.Save();
+    }
+    
+    public void ChangeSfxVolume(float db) {
+        
+        SfxVolume = Mathf.Clamp(db, -80, 0);
         _masterMixer.SetFloat("SfxVolume", SfxVolume);
         PlayerPrefs.SetFloat(PLAYERPREFS_SFXVOLUME, SfxVolume);
         PlayerPrefs.Save();

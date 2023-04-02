@@ -59,7 +59,7 @@ public class StartGameUI : MonoBehaviour, IHasSettings
     public void Show()
     {
         _visibilityObject.SetActive(true);
-        _startGameButton.Select();
+        if (MS.Main.InputManager.IsUsingGamepad()) _startGameButton.Select();
     }
 
     public void Hide()

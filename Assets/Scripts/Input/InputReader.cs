@@ -61,8 +61,10 @@ namespace Sambono
         public event Action PauseEvent;
         public event Action UnpauseEvent;
 
-
-        
+        public bool IsUsingGamepad()
+        {
+            return Gamepad.all.Count > 0;
+        }
 
 
         public void SwitchToGameplay()
@@ -94,6 +96,7 @@ namespace Sambono
         public Vector2 MoveVectorNormalized => _gameInput.Gameplay.Move.ReadValue<Vector2>().normalized;
 
         public bool IsSprintPressed { get; private set; }
+
         public bool IsJumpPressed { get; private set; }
         public bool IsInteractPressed { get; private set; }
         public bool IsInteractAltPressed { get; private set; }
@@ -263,9 +266,12 @@ namespace Sambono
                 PlayerPrefs.SetString(PLAYERPREFS_BINDINGS, _gameInput.SaveBindingOverridesAsJson());
             }).Start();
         }
-        public string GetBindingKeyString(Binding binding) {
+
+        public string GetBindingKeyString(Binding binding)
+        {
             string outputString = "?";
-            switch (binding) {
+            switch (binding)
+            {
                 case Binding.MoveUp:
                     outputString = _gameInput.Gameplay.Move.bindings[1].ToDisplayString();
                     break;
@@ -311,7 +317,7 @@ namespace Sambono
                 default:
                     throw new ArgumentOutOfRangeException(nameof(binding), binding, null);
             }
-        
+
             return outputString;
         }
     }

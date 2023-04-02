@@ -31,6 +31,7 @@ public class Cube : MonoBehaviour
     [SerializeField] private GameObject _fallCubePrefab;
 
     public event Action OnPlaced;
+    public static event Action OnAnyBlockPlaced;
 
     private void Awake()
     {
@@ -226,7 +227,7 @@ public class Cube : MonoBehaviour
 
         if (newScale.x <= 0 || newScale.z <= 0)
         {
-            gameObject.AddComponent<Rigidbody>();
+            gameObject.GetComponent<Rigidbody>().isKinematic = false;
             return false;
         }
 
@@ -238,6 +239,7 @@ public class Cube : MonoBehaviour
 
         CreateFallCube(overhang);
         OnPlaced?.Invoke();
+        OnAnyBlockPlaced?.Invoke();
         return true;
     }
 }

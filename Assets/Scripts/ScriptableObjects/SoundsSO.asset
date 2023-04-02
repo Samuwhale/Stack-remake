@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cd0d3336c7fb745ba908360dfe85ef80, type: 3}
+  m_Name: SoundsSO
+  m_EditorClassIdentifier: 
+  Ambience: {fileID: 8300000, guid: 1069b86edfe5146b9ad043c5f48b12c7, type: 3}
+  PlaceBlock:
+  - {fileID: 8300000, guid: 925c5467972044a30a8b58713248f8aa, type: 3}
+  - {fileID: 8300000, guid: 6e5e3622db8b34a90a1674eeb45bd4c9, type: 3}
+  - {fileID: 8300000, guid: f8b94bdbbe6824bbe82f5ca63888bac4, type: 3}
+  GameOver: {fileID: 8300000, guid: 89d8932fee58340f4aa0551d297a7da2, type: 3}
+  UISelect: {fileID: 8300000, guid: 319b053a38da545e3beb2b64ee4a3022, type: 3}
